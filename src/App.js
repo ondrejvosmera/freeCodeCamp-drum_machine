@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './App.css'
 
 const sounds = [
@@ -43,22 +43,62 @@ const sounds = [
 const App = () => (
   <div className='App'>
     <div className='pad'>
-      {sounds.map((sound, index) => (
-          <Button text={sound.key} key={index} audio={sound.mp3}/>
-       ))}
+      <h2 className='display'>Play a sound</h2>
+        {sounds.map((sound, index) => (
+            <Button text={sound.key} key={index} audio={sound.mp3}/>
+        ))}
      </div>
   </div>
 );
 
 class Button extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.audio = React.createRef()
+  }
+
+  playSound = () => {
+    this.audio.current.play();
+
+    const id = this.audio.current.id;
+
+    const parent = this.audio.current.parentNode;
+    parent.classList.add('active');
+
+    const display = parent.parentNode;
+    display.querySelector('h2').innerText = `${id} is playing`;
+  }
+
   render() {
+    const { text, audio } = this.props;
+
     return (
-      <div className='button'>
-        {this.props.text}
-        <audio />
+      <div className='button' onClick={this.playSound}>
+        {text}
+        <audio ref={this.audio} src={audio} className='clip' id={text}/>
       </div>
     )
   }
 }
+
+document.addEventListener('keydown', (e) => {
+  const id = e.key.toUpperCase();
+  const audio = document.getElementById(id);
+
+  if(audio) {
+    const parent = audio.parentNode;
+    parent.classList.add('active');
+    audio.play();
+
+    const display = parent.parentNode;
+    display.querySelector('h2').innerText = `${id} is playing`;
+
+    audio.addEventListener('ended', () => {
+      parent.classList.remove('active');
+    });
+  }
+});
 
 export default App;
